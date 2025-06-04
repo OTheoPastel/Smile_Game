@@ -13,42 +13,30 @@ function reiniciar() {
   desempenho = 0;
   tentativas = 0;
   acertos = 0;
-  jogar = true;
   jogarNovamente();
   atualizaPlacar(0, 0);
-  // Mostra o botão jogar novamente
   btnJogarNovamente.className = 'visivel';
-  // Oculta o botão reiniciar
   btnReiniciar.className = 'invisivel';
 }
 
 // Função jogar novamente
 function jogarNovamente() {
-  jogar = true; // Variável jogar volta a ser verdadeira
-  // Armazenamos todas as divs na variável divis (getElementsByTagName)
+  jogar = true;
   let divis = document.getElementsByTagName("div");
-  // Percorremos todas as divs armazenadas
   for (let i = 0; i < divis.length; i++) {
-    // Verificamos se são as divs com ids 0, 1, 2 ou 3
-    if (divis[i].id == 0 || divis[i].id == 1 || divis[i].id == 2 || divis[i].id == 3) {
-      // Alteramos a classe CSS das divs para 'inicial'
+    if (["0", "1", "2", "3"].includes(divis[i].id)) {
       divis[i].className = "inicial";
-      divis[i].innerHTML = divis[i].id; // Adiciona o número de volta
+      divis[i].innerHTML = divis[i].id;
     }
   }
 
-  // Armazenamos a imagem do Smile na variável imagem (getElementById)
   let imagem = document.getElementById("imagem");
-  // Se a imagem não for vazia (se ela existir)
-  if (imagem != "") {
-    // Removemos a imagem do Smile
+  if (imagem) {
     imagem.remove();
   }
 
-  // Imagem de erro
   let imagemErro = document.getElementById("imagemErro");
-  // Se a imagem de erro existir, removemos ela também
-  if (imagemErro != "") {
+  if (imagemErro) {
     imagemErro.remove();
   }
 }
@@ -62,26 +50,35 @@ function atualizaPlacar(acertos, tentativas) {
     " Desempenho: " + Math.round(desempenho) + "%";
 }
 
-// Função executada quando o jogador acertou
-function acertou(obj) {
-  obj.className = "acertou";
-  const img = new Image(100); // Cria a imagem com largura de 100px
-  img.id = "imagem";
-  img.src = "https://i1.sndcdn.com/avatars-000040422234-su9tw5-t1080x1080.jpg"; // Imagem do acerto
-  obj.appendChild(img); // Adiciona a imagem à div
-}
+// ✅ Função unificada para mostrar acertos e erros
+function mostrarResultado(obj, tipo) {
+  let classe, idImagem, urlImagem, limparConteudo;
 
-// Função executada quando o jogador errou
-function errou(obj) {
-  obj.innerHTML = ""; // Remove o conteúdo da div
-  obj.className = "errou";
-  const img = new Image(100); // Cria a imagem com largura de 100px
-  img.id = "imagemErro";
-  img.src = "https://www.nicelembrancinhas.com.br/image/cache/catalog/DIVERTIDAMENTE/TRISTEZA-650x650.jpg"; // Imagem de erro
-  obj.appendChild(img); // Adiciona a imagem de erro à div
+  if (tipo === "acerto") {
+    classe = "acertou";
+    idImagem = "imagem";
+    urlImagem = "https://i1.sndcdn.com/avatars-000040422234-su9tw5-t1080x1080.jpg";
+    limparConteudo = false;
+  } else if (tipo === "erro") {
+    classe = "errou";
+    idImagem = "imagemErro";
+    urlImagem = "https://www.nicelembrancinhas.com.br/image/cache/catalog/DIVERTIDAMENTE/TRISTEZA-650x650.jpg";
+    limparConteudo = true;
+  } else {
+    console.error("Tipo inválido para mostrarResultado");
+    return;
+  }
 
-  // Esconde o número que estava dentro da div quando errou
- 
+  if (limparConteudo) {
+    obj.innerHTML = "";
+  }
+
+  obj.className = classe;
+
+  const img = new Image(100);
+  img.id = idImagem;
+  img.src = urlImagem;
+  obj.appendChild(img);
 }
 
 // Função que sorteia um número aleatório entre 0 e 3 e verifica se o jogador acertou
@@ -93,15 +90,13 @@ function verifica(obj) {
     let sorteado = Math.floor(Math.random() * 4);
 
     if (obj.id == sorteado) {
-      acertou(obj); // Se acertou, chama a função de acerto
+      mostrarResultado(obj, "acerto");
       acertos++;
     } else {
-      errou(obj); // Se errou, chama a função de erro
+      mostrarResultado(obj, "erro");
 
-      // Armazena a div onde o Smile está escondido (getElementById)
       const objSorteado = document.getElementById(sorteado);
-      // Chama a função acertou para mostrar a div onde está o Smile
-      acertou(objSorteado);
+      mostrarResultado(objSorteado, "acerto");
     }
 
     atualizaPlacar(acertos, tentativas);
